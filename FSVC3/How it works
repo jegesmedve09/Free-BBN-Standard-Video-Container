@@ -1,0 +1,78 @@
+FSVC3 (FreeBBN Standard Video Container v3)
+
+"If it has a screen, Bad Apple will be seen."
+
+FSVC3 is an ultra-lightweight, zero-bloat multimedia container format designed natively for the FreeBBN project (a modern, open-source recreation of the PlayStation Broadband Navigator for the PS2).
+
+Instead of exhausting valuable retro CPU cycles or memory buffers on heavy modern prediction math or complex MPEG parsing, FSVC3 treats video and audio compilation as a strict, high-speed binary state machine language. The encoder handles the heavy work, allowing the C player core to remain minimal, fast, and light enough to run smoothly on legacy hardware.
+Architectural Breakdown & Core Optimizations
+
+The container utilizes a set of 1-byte instruction tags (Opcodes) to parse stream bytes on a rolling loop:
+
+    Coordinate Target Delta Compression Engine (0xF1 / 0xF2): Rather than continuously re-dumping identical pixel clusters, the encoder maps frame-by-frame shifts. It evaluates color structures and only streams specific 7-byte absolute position records (X, Y, R, G, B) for pixels that actually changed color state.
+
+    Hardware-Locked AV Sync (0xF3 / 0xF4): Constant-time 1102-byte raw PCM audio packets are strictly interleaved directly ahead of their matching video payloads, guaranteeing uniform streaming and hardware-locked synchronization.
+
+Opcode Specification Map
+0xF0 -> OP_DATA_START   (strictly at 0x40)
+0xF1 -> OP_FRAME_START  (Indicates incoming video frame data)
+0xF2 -> OP_FRAME_END    (Flushes frame buffer state to physical display hardware)
+0xF3 -> OP_AUDIO_START  (Indicates incoming synchronized raw PCM block)
+0xF4 -> OP_AUDIO_END    (Closes audio processing segment)
+0xFF -> OP_DATA_END     (end of data, also end of file)
+
+Structure Explanation:
+      0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
+0x00 66 73 76 63 33 04 80 05 12 1E 11 00 00 32 00 00
+0x10 46 72 65 65 42 42 4E 20 53 74 61 6E 64 61 72 64
+0x20 20 56 69 64 65 6F 20 43 6F 6E 74 61 69 6E 65 72
+0x30 20 76 33 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+0x00-0x04 fsvc3 signature
+0x05-0x06 Width as Binary encoded decimal (max 9999)
+0x07-0x08 Height as Binary encoded decimal (max 9999)
+0x09-0x0C Amount of frames in the file (reversed!) (1E 11 00 00 = 00 00 11 1E = 4382 frames!!!)
+0x0D Frame-to-Frame delay (50ms = 20FPS)
+0x0E-0x0F padding
+0x10-0x40 Optional metadata, can be left as 00
+0x40-EOF actual data, the bit 0x40 has to be F0 STRICTLY
+
+
+Getting Started & Repository Structure
+
+To run the pipeline and witness the compilation and real-time player decoding loop, make sure your working folder contains:
+
+    convert.py (The Python asset packaging compiler script)
+
+    player.c (The ANSI C standard runtime decoder environment)
+
+    video.mp4 (Your targeted demo video file—e.g., Bad Apple!!)
+
+1. Compile the Source Code
+
+Ensure you have a standard C compiler (like gcc) available on your system environment:
+Bash
+
+gcc player.c -o player -lSDL2
+
+2. Encode the Media File
+
+Run the Python script to let the compression engine ingest your media file assets, evaluate deltas, optimize block changes, and pack them into our binary file output layout format:
+Bash
+
+python3 encoder.py
+
+This will automatically generate your optimized video.fsvc3 binary package footprint.
+3. Launch the Playback Loop
+
+Execute the newly built player binary, and see the rendering in real-time:
+Bash
+
+./player
+
+Media Attribution / Disclaimer
+
+NOTE: The included video.mp4 (Bad Apple!!) is provided purely for educational testing, demonstration, and benchmarking purposes. I do NOT own the original copyright to this video or the underlying asset properties. It is packaged here in alignment with the Touhou Project open fan-creation guidelines to demonstrate performance benchmarks under rapid black-and-white high-contrast visual stress scenarios.
+License
+
+This project is released under the same open-source software license as the primary FreeBBN development ecosystem workspace. Contributions, compiler adaptations, performance patches, and forks for alternative retro platforms are highly welcomed!
