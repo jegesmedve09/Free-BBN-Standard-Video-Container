@@ -42,7 +42,7 @@ Getting Started & Repository Structure
 
 To run the pipeline and witness the compilation and real-time player decoding loop, make sure your working folder contains:
 
-    convert.py (The Python asset packaging compiler script)
+    encoder.c (The mp4_to_fsvc3-inator)
 
     player.c (The ANSI C standard runtime decoder environment)
 
@@ -54,21 +54,22 @@ Ensure you have a standard C compiler (like gcc) available on your system enviro
 Bash
 
 gcc player.c -o player -lSDL2
+gcc -O3 encoder.c -o encoder
 
 2. Encode the Media File
 
 Run the Python script to let the compression engine ingest your media file assets, evaluate deltas, optimize block changes, and pack them into our binary file output layout format:
 Bash
 
-python3 encoder.py
+encoder <video.mp4> <output.fsvc2> <width> <height>
 
 This will automatically generate your optimized video.fsvc3 binary package footprint.
 3. Launch the Playback Loop
 
-Execute the newly built player binary, and see the rendering in real-time:
+Execute the newly built player binary, and see the rendering in real-time (will read the "video.fsvc3" file in directory):
 Bash
 
-./player
+./player <video.fsvc3>
 
 Media Attribution / Disclaimer
 
