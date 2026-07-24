@@ -5,3 +5,4 @@ Original name was:
 FreeBBN Standard Video Compression Format (FSVCF) but then i thought about it and decided to make
 it a lossless format, so its now
 FreeBBN Standard Video Container (FSVC)
+from the start of FSVC6, Free-BBN Standard Video Container is also known as Free-BBN Sonic Video Container
